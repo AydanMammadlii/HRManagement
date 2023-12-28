@@ -13,15 +13,16 @@ public class CompanyServices : ICompanyServices
         Company? dbCompany=
             HRDbContext.Companies.Find(c=>c.Name.ToLower() == name.ToLower());
         if(dbCompany is not null) 
-            throw new AlreadyExistExcepsion($"{dbCompany.Name} is already exist");
+            throw new AlreadyExistException($"{dbCompany.Name} is already exist");
         Company company = new(name, description);
         HRDbContext.Companies.Add(company);
     }
-    public void Activate(string name, bool isActive = false)
+  
+    public void Activate(string name)
     {
-        if(String.IsNullOrEmpty(name))throw new ArgumentNullException();
+        if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
         Company? dbCompany =
-            HRDbContext.Companies.Find(c=>c.Name.ToLower() == name.ToLower());
+            HRDbContext.Companies.Find(c => c.Name.ToLower() == name.ToLower());
         if (dbCompany is null)
             throw new NotFoundException($"{name} company is not found");
         dbCompany.IsActive = true;
@@ -34,23 +35,41 @@ public class CompanyServices : ICompanyServices
             HRDbContext.Companies.Find(c=> c.Name.ToLower() == name.ToLower());
         if (dbCompany is null)
             throw new NotFoundException($"{name} company is not found");
+        dbCompany.IsActive = false;
     }
-
-    public Company GetCompany(int Id)
+    public void GetCompany(string name)
     {
-        throw new NotImplementedException();
+        if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
+        Company? dbCompany =
+            HRDbContext.Companies.Find(c => c.Name.ToLower() == name.ToLower());
+        if (dbCompany is null)
+            throw new NotFoundException($"{name} company is not found");
+        Console.WriteLine($"id: {dbCompany.Id}\n" +
+                          $"Company name: {dbCompany.Name}\n" +
+                          $"Company description: {dbCompany.Description}\n");
+        GetDepartmentIncluded(dbCompany.Name);
     }
-
+    
     public void GetDepartmentIncluded(string name)
     {
-        throw new NotImplementedException();
+        foreach (var department in HRDbContext.Departments)
+        {
+            if (department.CompanyId.Name.ToLower() == name.ToLower())
+            {
+                Console.WriteLine($"Id: {department.Id}; Group name:{department.Name}");
+                Console.WriteLine("------------------------------------------");
+            }
+        }
     }
 
     public void ShowAll()
     {
         foreach(var company in HRDbContext.Companies)
         {
-            Console.WriteLine($"id:{company.Id}; Company Name: {company.Name}");
+            if(company.IsActive == true)
+            {
+                Console.WriteLine($"Id:{company.Id}; Company Name: {company.Name}");
+            }
         }
     }
 
@@ -59,4 +78,14 @@ public class CompanyServices : ICompanyServices
         if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
         return HRDbContext.Companies.Find(c => c.Name.ToLower() == name.ToLower());
     }
+
+    public bool IsCompanyExist()
+    {
+        foreach (var item in HRDbContext.Companies)
+        {
+            if (item is not null && item.IsActive == true) return true;
+        }
+        return false;
+    }
+
 }

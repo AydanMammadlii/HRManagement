@@ -8,7 +8,7 @@ public interface ICompanyServices
     void Delete(string name);
     void Activate(string name);
     void ShowAll();
-    Company GetCompany(string name);
+    void GetCompany(string name);
     void GetDepartmentIncluded(string name);
     Company? FindCompanyByName(string name);
 
