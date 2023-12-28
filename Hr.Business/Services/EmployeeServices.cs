@@ -13,27 +13,63 @@ public class EmployeeServices : IEmployeeServices
         departmentServices = new DepartmentServices();
     }
     public void Create(string name, string surname, string email, string password,
-        string departmentName, decimal salary, int departmentId)
+        string departmentName, decimal salary)
     {
         if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
         Department? department = departmentServices.GetByName(departmentName);
         if (department is null) throw new NotFoundException($"{departmentName} is not exist");
-        Employee employee = new(name, surname, email, password, salary, departmentId );
+        if (department.EmployeeLimit == department.CurrentEmployeeCount)
+        {
+            throw new DepartmentIsFullException($"{department.Name} is already full");
+        }
+        Employee employee = new(name, surname, email, password, salary);
         HRDbContext.Employees.Add( employee );
+        department.CurrentEmployeeCount++;
+    }
+    public void Activate(string name, bool activated)
+    {
+        if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
+        var isEmployee = HRDbContext.Departments.Find(x => x.Name.ToLower() == name.ToLower());
+        if (isEmployee is null) throw new NotFoundException($"{name} employee is not found");
+        isEmployee.IsActive = true;
     }
     public void ChangeDepartment(int employeeId, string newDepartmentName)
     {
-        throw new NotImplementedException();
+        var employee = HRDbContext.Employees.Find(x => x.Id == employeeId);
+        if (employee is null) throw new NotFoundException("employee is not found");
+
+        if (String.IsNullOrEmpty(newDepartmentName)) throw new ArgumentNullException();
+        var department = HRDbContext.Departments.Find(x => x.Name.ToLower() == newDepartmentName.ToLower());
+        if (department is null) throw new NotFoundException("department is not found");
+
+        Delete(employee.Id);
+
+        Create(employee.Name, employee.Surname, employee.Email, employee.Password, department.Name, employee.Salary);
     }
     public void Delete(int Id)
     {
-        throw new NotImplementedException();
+        var employee = HRDbContext.Employees.Find(x => x.Id == Id);
+        if (employee is null) throw new NotFoundException("employee is not found");
+        employee.IsDelete = true;
+        if (employee.DepartmentId.CurrentEmployeeCount > 4)
+        {
+            employee.DepartmentId.CurrentEmployeeCount--;
+        }
+        else departmentServices.Delete(employee.DepartmentId.Name);
     }
     public void ShowAll()
     {
-        foreach (var employee in HRDbContext.Employees)
+        foreach (var item in HRDbContext.Employees)
         {
-            Console.WriteLine($"Id: {employee.Id}; Department name: {employee.Name}");
+            if (item.IsDelete == false)
+            {
+                Console.WriteLine($"ID: {item.Id}\n" +
+                                 $"Name: {item.Name}\n" +
+                                 $"Surname: {item.Surname}\n" +
+                                 $"Email: {item.Email}\n" +
+                                 $"Password: {item.Password}\n" +
+                                 $"Salary: {item.Salary}");
+            }
         }
     }
 }
