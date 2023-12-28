@@ -6,9 +6,12 @@ public interface ICompanyServices
 {
     void Create(string? name, string description);
     void Delete(string name);
-    void Activate(string name, bool isActive = false);
+    void Activate(string name);
     void ShowAll();
-    Company GetCompany(int Id);
+    Company GetCompany(string name);
     void GetDepartmentIncluded(string name);
     Company? FindCompanyByName(string name);
+
+    //----------------------------------------
+    bool IsCompanyExist();
 }
