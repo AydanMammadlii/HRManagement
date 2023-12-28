@@ -19,12 +19,21 @@ public class CompanyServices : ICompanyServices
     }
     public void Activate(string name, bool isActive = false)
     {
-        throw new NotImplementedException();
+        if(String.IsNullOrEmpty(name))throw new ArgumentNullException();
+        Company? dbCompany =
+            HRDbContext.Companies.Find(c=>c.Name.ToLower() == name.ToLower());
+        if (dbCompany is null)
+            throw new NotFoundException($"{name} company is not found");
+        dbCompany.IsActive = true;
     }
 
     public void Delete(string name)
     {
-        throw new NotImplementedException();
+        if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
+        Company? dbCompany = 
+            HRDbContext.Companies.Find(c=> c.Name.ToLower() == name.ToLower());
+        if (dbCompany is null)
+            throw new NotFoundException($"{name} company is not found");
     }
 
     public Company GetCompany(int Id)
