@@ -3,6 +3,7 @@
 public enum Menu
 {
     //Company
+    Exit = 0,
     CreateCompany = 1,
     ShowAllCompany,
     ActivateCompany,

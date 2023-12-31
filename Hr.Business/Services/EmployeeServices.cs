@@ -13,7 +13,7 @@ public class EmployeeServices : IEmployeeServices
         departmentServices = new DepartmentServices();
     }
     public void Create(string name, string surname, string email, string password,
-        string departmentName, decimal salary)
+       decimal salary, string departmentName)
     {
         if (String.IsNullOrEmpty(name)) throw new ArgumentNullException();
         Department? department = departmentServices.GetByName(departmentName);
@@ -44,7 +44,7 @@ public class EmployeeServices : IEmployeeServices
 
         Delete(employee.Id);
 
-        Create(employee.Name, employee.Surname, employee.Email, employee.Password, department.Name, employee.Salary);
+        Create(employee.Name, employee.Surname, employee.Email, employee.Password, employee.Salary, department.Name);
     }
     public void Delete(int Id)
     {
@@ -72,4 +72,5 @@ public class EmployeeServices : IEmployeeServices
             }
         }
     }
+
 }
